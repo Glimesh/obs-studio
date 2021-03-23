@@ -449,8 +449,17 @@ static void set_peak_bitrate(struct ftl_stream *stream)
 	// will queue data on the client and start adding latency. If the internet
 	// connection really can't handle the bitrate the user will see either lost frame
 	// and recovered frame counts go up, which is reflect in the dropped_frames count.
-	stream->peak_kbps = stream->params.peak_kbps =
-		user_desired_bitrate * 12 / 10;
+	int min_bitrate = user_desired_bitrate * 12 / 10;
+	if (results.peak_kbps > min_bitrate)
+	{
+		// Assume we can use a large percentage of the available bandwidth
+		stream->peak_kbps = stream->params.peak_kbps = results.peak_kbps * 9 / 10;
+	}
+	else
+	{
+		warn("Speed test result was slower than 1.2x the target bitrate, considering lowering the bitrate");
+		stream->peak_kbps = stream->params.peak_kbps = min_bitrate;
+	}
 	ftl_ingest_update_params(&stream->ftl_handle, &stream->params);
 }
 
