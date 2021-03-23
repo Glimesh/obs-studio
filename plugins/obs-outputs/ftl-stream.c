@@ -410,8 +410,8 @@ static int send_packet(struct ftl_stream *stream, struct encoder_packet *packet,
 
 static void set_peak_bitrate(struct ftl_stream *stream)
 {
-	int speedtest_kbps = 15000;
-	int speedtest_duration = 1000;
+	int speedtest_kbps = 40000;
+	int speedtest_duration = 2000;
 	speed_test_t results;
 	ftl_status_t status_code;
 
