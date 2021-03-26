@@ -1421,12 +1421,27 @@ bool OBSApp::OBSInit()
 			ResetHotkeyState(state == Qt::ApplicationActive);
 		});
 	ResetHotkeyState(applicationState() == Qt::ApplicationActive);
+
+	struct tm expiration {};
+	expiration.tm_year = 2021 - 1900;
+	expiration.tm_mon = 6 - 1;
+	expiration.tm_mday = 1;
+	double timeRemaining = difftime(mktime(&expiration), time(NULL));
+	blog(LOG_WARNING, "Expirimental build, expires in: %d seconds", timeRemaining);
+	if (timeRemaining <= 0.0) {
+		OBSCrashReport expired(mainWindow, "This experimental OBS build has expired, please switch to an official OBS build.");
+		expired.exec();
+		return false;
+	}
+
 	return true;
 }
 
 string OBSApp::GetVersionString() const
 {
 	stringstream ver;
+
+	ver << "- EXPERIMENTAL Glimesh.tv build, expires 2021-06-01 - ";
 
 #ifdef HAVE_OBSCONFIG_H
 	ver << OBS_VERSION;
