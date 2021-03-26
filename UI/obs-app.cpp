@@ -1441,7 +1441,7 @@ string OBSApp::GetVersionString() const
 {
 	stringstream ver;
 
-	ver << "- EXPERIMENTAL Glimesh.tv build, expires 2021-06-01 - ";
+	ver << "- EXPERIMENTAL Glimesh.tv build - double_nack_slots - expires 2021-06-01 - ";
 
 #ifdef HAVE_OBSCONFIG_H
 	ver << OBS_VERSION;
