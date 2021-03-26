@@ -408,25 +408,6 @@ static int send_packet(struct ftl_stream *stream, struct encoder_packet *packet,
 
 static void set_peak_bitrate(struct ftl_stream *stream)
 {
-	int speedtest_kbps = 15000;
-	int speedtest_duration = 1000;
-	speed_test_t results;
-	ftl_status_t status_code;
-
-	status_code = ftl_ingest_speed_test_ex(&stream->ftl_handle,
-					       speedtest_kbps,
-					       speedtest_duration, &results);
-
-	float percent_lost = 0;
-
-	if (status_code == FTL_SUCCESS) {
-		percent_lost = (float)results.lost_pkts * 100.f /
-			       (float)results.pkts_sent;
-	} else {
-		warn("Speed test failed with: %s",
-		     ftl_status_code_to_string(status_code));
-	}
-
 	// Get what the user set the encoding bitrate to.
 	obs_encoder_t *video_encoder =
 		obs_output_get_video_encoder(stream->output);
@@ -435,20 +416,11 @@ static void set_peak_bitrate(struct ftl_stream *stream)
 		(int)obs_data_get_int(video_settings, "bitrate");
 	obs_data_release(video_settings);
 
-	// Report the results.
-	info("Speed test completed: User desired bitrate %d, Peak kbps %d, "
-	     "initial rtt %d, "
-	     "final rtt %d, %3.2f lost packets",
-	     user_desired_bitrate, results.peak_kbps, results.starting_rtt,
-	     results.ending_rtt, percent_lost);
-
-	// We still want to set the peak to about 1.2x what the target bitrate is,
-	// even if the speed test reported it should be lower. If we don't, FTL
-	// will queue data on the client and start adding latency. If the internet
-	// connection really can't handle the bitrate the user will see either lost frame
-	// and recovered frame counts go up, which is reflect in the dropped_frames count.
-	stream->peak_kbps = stream->params.peak_kbps =
-		user_desired_bitrate * 12 / 10;
+	// Set the peak video send bitrate to a 1.2x the target bitrate. Video
+	// traffic can be bursty, the extra headroom helps FTL not buffer packets
+	// quite as much.  If the user's connection can't handle this bitrate they
+	// will see the dropped frames count go up and can lower the desired bitrate.
+	stream->peak_kbps = stream->params.peak_kbps = user_desired_bitrate * 12 / 10;
 	ftl_ingest_update_params(&stream->ftl_handle, &stream->params);
 }
 
