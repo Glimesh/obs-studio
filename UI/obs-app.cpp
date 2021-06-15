@@ -1424,7 +1424,7 @@ bool OBSApp::OBSInit()
 
 	struct tm expiration {};
 	expiration.tm_year = 2021 - 1900;
-	expiration.tm_mon = 6 - 1;
+	expiration.tm_mon = 12 - 1;
 	expiration.tm_mday = 1;
 	double timeRemaining = difftime(mktime(&expiration), time(NULL));
 	blog(LOG_WARNING, "Expirimental build, expires in: %d seconds", timeRemaining);
