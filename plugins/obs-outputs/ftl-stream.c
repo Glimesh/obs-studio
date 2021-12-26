@@ -416,11 +416,12 @@ static void set_peak_bitrate(struct ftl_stream *stream)
 		(int)obs_data_get_int(video_settings, "bitrate");
 	obs_data_release(video_settings);
 
-	// Set the peak video send bitrate to a 1.2x the target bitrate. Video
+	// Set the peak video send bitrate to 1.8x the target bitrate. Video
 	// traffic can be bursty, the extra headroom helps FTL not buffer packets
-	// quite as much.  If the user's connection can't handle this bitrate they
-	// will see the dropped frames count go up and can lower the desired bitrate.
-	stream->peak_kbps = stream->params.peak_kbps = user_desired_bitrate * 12 / 10;
+	// quite as much. If the user's connection can't handle this bitrate they
+	// will see the dropped frames count go up and can lower the target bitrate.
+	stream->peak_kbps = stream->params.peak_kbps = user_desired_bitrate * 18 / 10;
+	blog(LOG_INFO, "Peak kbps (%d)", stream->peak_kbps);
 	ftl_ingest_update_params(&stream->ftl_handle, &stream->params);
 }
 
